@@ -25,7 +25,8 @@ const steps: Step[] = [
 
 const smoothEase = [0.22, 1, 0.36, 1] as const;
 const springTransition: Transition = { type: "spring", stiffness: 260, damping: 20, mass: 0.8 };
-const bookingUrl = "https://essex-nail-club.square.site/";
+const bookingUrl =
+  "https://book.squareup.com/appointments/ndtofgbocxjbf9/location/LACCK0ZJFVNDM/services";
 
 const headingVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
@@ -348,10 +349,10 @@ export function BookingSection() {
         >
           <BookingButton />
           <a
-            href="tel:+44000000000"
+            href={bookingUrl}
             className="inline-flex items-center justify-center border-b border-border pb-1 text-[0.72rem] uppercase tracking-[0.16em] text-muted transition hover:border-mauve hover:text-mauve"
           >
-            Call Us Directly
+            View on Square
           </a>
         </motion.div>
       </div>

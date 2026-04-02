@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { BookingSection } from "@/components/BookingSection";
 
 const ease = [0.22, 1, 0.36, 1] as const;
@@ -19,14 +19,22 @@ type GalleryItem = {
   focus: string;
 };
 
-type Service = {
+type ServiceOption = {
   name: string;
-  tagline: string;
-  description: string;
-  perks: string[];
-  price: string;
+  price: number;
+  from?: boolean;
+  removal?: boolean;
+};
+
+type ServiceCard = {
+  id: string;
+  title: string;
+  benefit: string;
+  highlights: string[];
+  image: string;
+  focus: string;
+  options: ServiceOption[];
   featured?: boolean;
-  icon: "biab" | "acrylic" | "art";
 };
 
 const trustStats = [
@@ -39,6 +47,42 @@ const proofPoints = [
   "Rated 4.5 stars by 50+ clients",
   "Based in Epping, Essex",
   "Walk-ins welcome · appointments preferred",
+];
+
+const socialLinks = [
+  {
+    name: "Instagram",
+    href: "https://www.instagram.com/essexnailclub/",
+    icon: (
+      <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24">
+        <rect x="3.5" y="3.5" width="17" height="17" rx="5" stroke="currentColor" strokeWidth="1.5" />
+        <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="1.5" />
+        <circle cx="17.25" cy="6.75" r="1" fill="currentColor" />
+      </svg>
+    ),
+  },
+  {
+    name: "TikTok",
+    href: "https://www.tiktok.com/@essexnailclub",
+    icon: (
+      <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24">
+        <path
+          d="M14.2 5c1 1.4 2.4 2.3 4 2.5v2.1a8.15 8.15 0 0 1-4-1.2v5.3a5.35 5.35 0 1 1-5.4-5.3c.3 0 .6 0 .9.1v2.2a2.95 2.95 0 1 0 2.1 2.8V5h2.4Z"
+          fill="currentColor"
+        />
+      </svg>
+    ),
+  },
+  {
+    name: "Fresha",
+    href: "https://www.fresha.com/lvp/essex-nail-club-high-street-VEnY92",
+    icon: (
+      <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24">
+        <rect x="3.5" y="3.5" width="17" height="17" rx="5" stroke="currentColor" strokeWidth="1.5" />
+        <path d="M9 8h7M9 12h5M9 8v8" stroke="currentColor" strokeLinecap="round" strokeWidth="1.5" />
+      </svg>
+    ),
+  },
 ];
 
 const testimonials = [
@@ -113,51 +157,113 @@ const galleryItems: GalleryItem[] = [
   },
 ];
 
-const services: Service[] = [
+const primaryServiceCards: ServiceCard[] = [
   {
-    name: "Natural BIAB",
-    tagline: "Builder In A Bottle, upgraded",
-    description:
-      "Strong, flexible and polished for everyday wear. Ideal if you want durable nails without heavy extensions.",
-    perks: [
-      "Up to 4-6 weeks wear",
+    id: "natural-biab",
+    title: "Natural BIAB",
+    benefit: "Strong, glossy nails that hold up beautifully.",
+    highlights: [
+      "Lasts 3-4 weeks",
       "Strengthens natural nails",
-      "Full color range available",
-      "Add nail art from £5",
+      "Low-maintenance regrowth",
+      "Gel colour included",
     ],
-    price: "£35",
+    image: "/images/placeholders/gallery-2.jpg",
+    focus: "52% 28%",
     featured: true,
-    icon: "biab",
+    options: [
+      { name: "BIAB Overlay", price: 35, from: true },
+      { name: "BIAB Infill", price: 30, from: true },
+      { name: "BIAB Removal", price: 10, removal: true },
+      { name: "Dip Powder Overlay", price: 42, from: true },
+      { name: "Dip Powder New Set", price: 47, from: true },
+      { name: "Dip Powder Removal", price: 12, removal: true },
+    ],
   },
   {
-    name: "Acrylic Extensions",
-    tagline: "Length, shape and strength",
-    description:
-      "Custom sculpted acrylic extensions designed around your preferred length and shape, finished with a flawless top coat.",
-    perks: [
+    id: "acrylic-extensions",
+    title: "Acrylic Extensions",
+    benefit: "Length and shape with long-lasting strength.",
+    highlights: [
+      "Lasts 3-4 weeks",
       "Custom shape and length",
-      "Infill appointments available",
-      "Gel polish finish included",
-      "Nail art add-ons available",
+      "Strong daily wear",
+      "Gel colour included",
     ],
-    price: "£50",
-    icon: "acrylic",
+    image: "/images/placeholders/gallery-3.jpg",
+    focus: "65% 42%",
+    options: [
+      { name: "Acrylic New Set", price: 50, from: true },
+      { name: "Acrylic Infills", price: 40, from: true },
+      { name: "Acrylic Overlay", price: 45, from: true },
+      { name: "Acrylic Removal", price: 15, removal: true },
+    ],
   },
   {
-    name: "Luxury Nail Art",
-    tagline: "Bespoke wearable art",
-    description:
-      "From minimal florals to statement sets, every design is tailored to your inspiration and occasion.",
-    perks: [
-      "Bespoke design consultation",
-      "Gel, chrome and foil finishes",
-      "Seasonal and event designs",
-      "Bring your inspo photos",
+    id: "soft-gel-tips",
+    title: "Soft Gel Tips",
+    benefit: "Lightweight full-cover tips with a clean finish.",
+    highlights: [
+      "Lightweight full-cover feel",
+      "Custom length and shape",
+      "Natural looking finish",
+      "Glossy colour included",
     ],
-    price: "£55",
-    icon: "art",
+    image: "/images/placeholders/gallery-1.jpg",
+    focus: "50% 56%",
+    options: [
+      { name: "Soft Gel Tips New Set", price: 55, from: true },
+      { name: "Soft Gel Tips Extra Long Set", price: 65 },
+      { name: "Soft Gel Tips Removal", price: 15, removal: true },
+    ],
+  },
+  {
+    id: "gel-polish-care",
+    title: "Gel Polish & Care",
+    benefit: "Quick refresh for hands or feet with lasting shine.",
+    highlights: [
+      "Perfect quick refresh",
+      "Hands or feet options",
+      "Long-lasting glossy finish",
+      "Great for maintenance",
+    ],
+    image: "/images/placeholders/gallery-5.jpg",
+    focus: "52% 48%",
+    options: [
+      { name: "Gel Polish Hands", price: 25 },
+      { name: "Gel Polish Feet", price: 25 },
+      { name: "Gel Manicure", price: 32 },
+      { name: "Gel Pedicure", price: 36 },
+      { name: "Gel Mani & Pedi", price: 60 },
+      { name: "Gel Removal", price: 10, removal: true },
+      { name: "Kids Gel Hands", price: 20 },
+      { name: "Kids Gel Feet", price: 20 },
+    ],
   },
 ];
+
+const addOnOptions: ServiceOption[] = [
+  { name: "Nail Art", price: 5, from: true },
+  { name: "Nail Repair", price: 10 },
+  { name: "Toe Extensions", price: 12, from: true },
+];
+
+function getFromAmount(options: ServiceOption[]) {
+  const nonRemoval = options.filter((option) => !option.removal);
+  return Math.min(...nonRemoval.map((option) => option.price));
+}
+
+function getFromPrice(options: ServiceOption[]) {
+  return `£${getFromAmount(options)}`;
+}
+
+function getFromTagPrice(options: ServiceOption[]) {
+  return `from £${getFromAmount(options)}`;
+}
+
+function formatOptionPrice(option: ServiceOption) {
+  return `${option.from ? "from " : ""}£${option.price}`;
+}
 
 const reasons = [
   {
@@ -182,7 +288,8 @@ const primaryCta =
   "inline-flex items-center justify-center rounded-sm bg-deep px-8 py-4 text-[0.72rem] font-medium uppercase tracking-[0.2em] text-cream transition hover:-translate-y-0.5 hover:bg-mauve";
 const ghostCta =
   "inline-flex items-center justify-center border-b border-border pb-1 text-[0.72rem] font-medium uppercase tracking-[0.16em] text-muted transition hover:border-mauve hover:text-mauve";
-const bookingUrl = "https://essex-nail-club.square.site/";
+const bookingUrl =
+  "https://book.squareup.com/appointments/ndtofgbocxjbf9/location/LACCK0ZJFVNDM/services";
 
 function Reveal({
   children,
@@ -212,26 +319,40 @@ function SectionHeader({
   intro,
   light = false,
   compactMobile = false,
+  titleClassName = "",
+  introClassName = "",
+  wrapperClassName = "mb-14",
 }: {
   label: string;
   title: string;
   intro?: string;
   light?: boolean;
   compactMobile?: boolean;
+  titleClassName?: string;
+  introClassName?: string;
+  wrapperClassName?: string;
 }) {
   const labelColor = light ? "text-rose" : "text-mauve";
   const titleColor = light ? "text-cream" : "text-deep";
   const introColor = light ? "text-cream/60" : "text-muted";
 
   return (
-    <Reveal className="mb-14">
+    <Reveal className={wrapperClassName}>
       <p className={`mb-3 flex items-center gap-3 text-[0.65rem] uppercase tracking-[0.28em] ${labelColor}`}>
         <span className={`h-px w-8 ${light ? "bg-rose" : "bg-mauve"}`} />
         {label}
       </p>
-      <h2 className={`font-display text-[clamp(2rem,3.5vw,3.05rem)] leading-tight ${titleColor}`}>{title}</h2>
+      <h2
+        className={`font-display text-[clamp(2rem,3.5vw,3.05rem)] leading-tight ${titleColor} ${titleClassName}`}
+      >
+        {title}
+      </h2>
       {intro ? (
-        <p className={`mt-4 max-w-2xl text-[0.92rem] leading-8 ${introColor} ${compactMobile ? "hidden sm:block" : ""}`}>
+        <p
+          className={`mt-4 max-w-2xl text-[0.92rem] leading-8 ${introColor} ${
+            compactMobile ? "hidden sm:block" : ""
+          } ${introClassName}`}
+        >
           {intro}
         </p>
       ) : null}
@@ -239,44 +360,39 @@ function SectionHeader({
   );
 }
 
-function ServiceIcon({ icon }: { icon: Service["icon"] }) {
-  if (icon === "biab") {
-    return (
-      <svg className="h-10 w-10 opacity-55" viewBox="0 0 40 40" fill="none" aria-hidden>
-        <ellipse cx="20" cy="25" rx="8" ry="11" stroke="rgba(212,169,161,0.72)" strokeWidth="1.5" />
-        <path d="M12 25 Q12 14 20 12 Q28 14 28 25" stroke="rgba(212,169,161,0.45)" strokeWidth="1.1" />
-      </svg>
-    );
-  }
-
-  if (icon === "acrylic") {
-    return (
-      <svg className="h-10 w-10 opacity-55" viewBox="0 0 40 40" fill="none" aria-hidden>
-        <rect x="14" y="10" width="12" height="22" rx="6" stroke="rgba(212,169,161,0.65)" strokeWidth="1.5" />
-        <path d="M14 20 Q10 20 10 26 Q10 32 14 32" stroke="rgba(212,169,161,0.42)" strokeWidth="1.1" />
-        <path d="M26 20 Q30 20 30 26 Q30 32 26 32" stroke="rgba(212,169,161,0.42)" strokeWidth="1.1" />
-      </svg>
-    );
-  }
-
-  return (
-    <svg className="h-10 w-10 opacity-55" viewBox="0 0 40 40" fill="none" aria-hidden>
-      <path
-        d="M20 8 L22 16 L30 16 L24 21 L26 29 L20 24 L14 29 L16 21 L10 16 L18 16 Z"
-        stroke="rgba(212,169,161,0.65)"
-        strokeWidth="1.5"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
 export default function Home() {
   const [activeTab, setActiveTab] = useState<GalleryCategory>("All");
+  const [activeServiceIndex, setActiveServiceIndex] = useState(0);
+  const [expandedService, setExpandedService] = useState<string | null>(null);
+  const [showAddOnOptions, setShowAddOnOptions] = useState(false);
+  const [pauseServiceCarousel, setPauseServiceCarousel] = useState(false);
   const visibleGallery = useMemo(
     () => (activeTab === "All" ? galleryItems : galleryItems.filter((item) => item.category === activeTab)),
     [activeTab],
   );
+  const activeService = primaryServiceCards[activeServiceIndex];
+
+  useEffect(() => {
+    if (pauseServiceCarousel || expandedService) return;
+    const intervalId = setInterval(() => {
+      setActiveServiceIndex((current) => (current + 1) % primaryServiceCards.length);
+    }, 6200);
+    return () => clearInterval(intervalId);
+  }, [pauseServiceCarousel, expandedService]);
+
+  const goToService = (index: number) => {
+    setActiveServiceIndex((index + primaryServiceCards.length) % primaryServiceCards.length);
+    setExpandedService(null);
+  };
+
+  const goToNextService = () => {
+    goToService(activeServiceIndex + 1);
+  };
+
+  const goToPreviousService = () => {
+    goToService(activeServiceIndex - 1);
+  };
+
   const year = new Date().getFullYear();
 
   return (
@@ -361,8 +477,8 @@ export default function Home() {
                 <a href={bookingUrl} className={primaryCta}>
                   Book Your Appointment
                 </a>
-                <a href="#services" className={ghostCta}>
-                  View Services
+                <a href={bookingUrl} className={ghostCta}>
+                  See Available Slots
                 </a>
               </Reveal>
 
@@ -552,75 +668,264 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="services" className="bg-deep px-5 py-24 sm:px-8 lg:px-12">
-          <div className="mx-auto max-w-7xl">
-            <SectionHeader
-              label="Signature Services"
-              title="Choose Your Look"
-              intro="Three high-performing treatments designed for beautiful nails and reliable retention."
-              light
+       <section id="services" className="bg-deep px-5 py-24 sm:px-8 lg:px-12">
+  <div className="mx-auto max-w-7xl">
+    <SectionHeader
+      label="Choose Your Set"
+      title="Simple options. Fast booking."
+      intro="Pick your set, check options only if you need them, then book in one tap."
+      light
+      wrapperClassName="mb-10"
+      titleClassName="text-[clamp(1.5rem,2.2vw,2rem)] leading-[1.14]"
+      introClassName="mt-3 max-w-xl text-[0.86rem] leading-6 text-cream/55"
+    />
+
+    {/* ── Service Tabs ── */}
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.1 }}
+      transition={{ type: "spring", stiffness: 160, damping: 20 }}
+      className="mb-5 grid gap-2 sm:grid-cols-2 xl:grid-cols-4"
+    >
+      {primaryServiceCards.map((service, index) => {
+        const isActive = index === activeServiceIndex;
+        return (
+          <button
+            key={`${service.id}-selector`}
+            type="button"
+            onClick={() => goToService(index)}
+            className={`rounded-full border px-4 py-3 text-left transition ${
+              isActive
+                ? "border-rose/55 bg-rose text-deep shadow-[0_10px_25px_rgba(212,169,161,0.28)]"
+                : "border-white/10 bg-white/5 text-cream/70 hover:border-rose/30 hover:text-cream"
+            }`}
+          >
+            <p className="font-display text-[1rem] leading-tight">{service.title}</p>
+            <p className={`mt-0.5 text-[0.61rem] uppercase tracking-[0.15em] ${isActive ? "text-deep/70" : "text-rose"}`}>
+              {getFromTagPrice(service.options)}
+            </p>
+          </button>
+        );
+      })}
+    </motion.div>
+
+    {/* ── Service Panel ── */}
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.1 }}
+      transition={{ type: "spring", stiffness: 160, damping: 20 }}
+      onMouseEnter={() => setPauseServiceCarousel(true)}
+      onMouseLeave={() => setPauseServiceCarousel(false)}
+      className="relative overflow-hidden rounded-sm border border-white/10 bg-white/5"
+    >
+      {activeService.featured ? (
+        <span className="absolute right-5 top-0 z-10 rounded-b-sm bg-mauve px-3 py-1 text-[0.55rem] uppercase tracking-[0.18em] text-white">
+          Most Popular
+        </span>
+      ) : null}
+
+      <AnimatePresence mode="wait">
+        <motion.article
+          key={activeService.id}
+          initial={{ opacity: 0, x: 30 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -30 }}
+          transition={{ type: "spring", stiffness: 210, damping: 22 }}
+          className="grid items-stretch lg:grid-cols-[1fr_1.6fr]"
+        >
+          {/* ── Image — contained, left column ── */}
+          <div className="relative h-56 overflow-hidden lg:h-auto lg:min-h-[300px] lg:max-h-[380px]">
+            <Image
+              src={activeService.image}
+              alt={activeService.title}
+              width={700}
+              height={500}
+              className="h-full w-full object-cover"
+              style={{ objectPosition: activeService.focus }}
+              sizes="(min-width: 1024px) 35vw, 100vw"
             />
-
-            <motion.div
-              className="grid gap-5 lg:grid-cols-3"
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true, amount: 0.1 }}
-            >
-              {services.map((service) => (
-                <motion.article
-                  key={service.name}
-                  whileHover={{ y: -5 }}
-                  transition={{ duration: 0.2 }}
-                  className={`relative border p-8 sm:p-9 ${
-                    service.featured
-                      ? "border-rose/35 bg-rose/12"
-                      : "border-white/10 bg-white/5 hover:bg-white/8"
-                  }`}
-                >
-                  {service.featured ? (
-                    <span className="absolute right-7 top-0 rounded-b-sm bg-mauve px-3 py-1 text-[0.55rem] uppercase tracking-[0.18em] text-white">
-                      Most Popular
-                    </span>
-                  ) : null}
-
-                  <ServiceIcon icon={service.icon} />
-
-                  <h3 className="mt-5 font-display text-[1.6rem] text-cream">{service.name}</h3>
-                  <p className="mt-1 text-[0.74rem] uppercase tracking-[0.08em] text-rose">{service.tagline}</p>
-                  <p className="mt-5 text-[0.86rem] leading-7 text-cream/65">{service.description}</p>
-
-                  <ul className="mt-6 space-y-2.5">
-                    {service.perks.map((perk) => (
-                      <li key={perk} className="flex items-center gap-3 text-[0.79rem] text-cream/70">
-                        <span className="text-mauve">—</span>
-                        <span>{perk}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <div className="mt-7 flex items-end justify-between border-t border-white/10 pt-6">
-                    <div>
-                      <p className="text-[0.58rem] uppercase tracking-[0.14em] text-muted">From</p>
-                      <p className="font-display text-[2rem] leading-none text-cream">{service.price}</p>
-                    </div>
-                    <a
-                      href={bookingUrl}
-                      className={`rounded-sm border px-4 py-2.5 text-[0.64rem] uppercase tracking-[0.18em] transition ${
-                        service.featured
-                          ? "border-mauve bg-mauve text-white hover:border-rose hover:bg-rose"
-                          : "border-rose/40 text-rose hover:border-mauve hover:bg-mauve hover:text-white"
-                      }`}
-                    >
-                      Book Now
-                    </a>
-                  </div>
-                </motion.article>
-              ))}
-            </motion.div>
+            {/* Right-edge fade into panel */}
+            <div className="absolute inset-y-0 right-0 hidden w-20 bg-gradient-to-r from-transparent to-[#1e1614]/80 lg:block" />
+            {/* Bottom fade on mobile */}
+            <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-deep/60 to-transparent lg:hidden" />
           </div>
-        </section>
 
+          {/* ── Content ── */}
+          <div className="flex flex-col justify-between gap-5 p-6 sm:p-7 lg:p-8">
+
+            {/* Name + tagline + features */}
+            <div>
+              <p className="mb-1.5 text-[0.58rem] uppercase tracking-[0.22em] text-rose/70">
+                {activeService.title}
+              </p>
+              <h3 className="font-display text-[1.5rem] leading-snug text-cream">
+                {activeService.benefit}
+              </h3>
+
+              <ul className="mt-4 grid gap-y-1.5 sm:grid-cols-2 sm:gap-x-6">
+                {activeService.highlights.map((highlight) => (
+                  <li key={highlight} className="flex items-center gap-2 text-[0.76rem] font-light text-cream/60">
+                    <span className="text-rose/80">✓</span>
+                    <span>{highlight}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Price + CTA */}
+            <div className="border-t border-white/10 pt-5">
+              <div className="flex flex-wrap items-end justify-between gap-5">
+
+                {/* Price */}
+                <div>
+                  <p className="text-[0.56rem] uppercase tracking-[0.18em] text-muted">From</p>
+                  <p className="font-display text-[2rem] leading-none text-cream">
+                    {getFromPrice(activeService.options)}
+                  </p>
+                  <p className="mt-1.5 text-[0.67rem] italic text-cream/50">Rated 4.5★ by 50+ clients</p>
+                </div>
+
+                {/* CTA */}
+                <div className="flex flex-col items-end gap-1.5">
+                  <motion.a
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                    transition={{ type: "spring", stiffness: 280, damping: 20 }}
+                    href={bookingUrl}
+                    className="inline-flex items-center justify-center rounded-sm border border-mauve bg-mauve px-8 py-3.5 text-[0.64rem] uppercase tracking-[0.24em] text-white transition hover:border-rose hover:bg-rose"
+                  >
+                    Book This
+                  </motion.a>
+                  <p className="text-[0.56rem] tracking-[0.05em] text-cream/40">
+                    No deposit required · Instant confirmation
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setExpandedService((current) =>
+                        current === activeService.id ? null : activeService.id,
+                      )
+                    }
+                    className="text-[0.58rem] uppercase tracking-[0.16em] text-rose transition hover:text-white"
+                  >
+                    {expandedService === activeService.id ? "Hide options" : "View options"}
+                  </button>
+                </div>
+
+              </div>
+
+              {/* Expandable options */}
+              <AnimatePresence initial={false}>
+                {expandedService === activeService.id ? (
+                  <motion.div
+                    key={`${activeService.id}-options`}
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.28, ease }}
+                    className="mt-4 overflow-hidden border-t border-white/10"
+                  >
+                    <ul className="mt-4 space-y-2 pb-1">
+                      {activeService.options.map((option) => (
+                        <li
+                          key={option.name}
+                          className="flex items-center justify-between gap-3 text-[0.74rem] text-cream/70"
+                        >
+                          <span>{option.name}</span>
+                          <span className="shrink-0 text-rose">{formatOptionPrice(option)}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </motion.div>
+                ) : null}
+              </AnimatePresence>
+            </div>
+
+          </div>
+        </motion.article>
+      </AnimatePresence>
+
+      {/* ── Carousel controls — bottom of panel ── */}
+      <div className="flex items-center justify-between border-t border-white/8 px-6 py-3 sm:px-7 lg:px-8">
+        <div className="flex items-center gap-2">
+          {primaryServiceCards.map((service, index) => (
+            <button
+              key={`${service.id}-dot`}
+              type="button"
+              onClick={() => goToService(index)}
+              aria-label={`Show ${service.title}`}
+              className={`h-1.5 rounded-full transition-all ${
+                index === activeServiceIndex ? "w-7 bg-rose" : "w-2.5 bg-white/25 hover:bg-white/50"
+              }`}
+            />
+          ))}
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={goToPreviousService}
+            className="h-8 w-8 rounded-full border border-white/15 text-cream/70 transition hover:border-rose/45 hover:text-rose"
+            aria-label="Previous service"
+          >
+            ←
+          </button>
+          <button
+            type="button"
+            onClick={goToNextService}
+            className="h-8 w-8 rounded-full border border-white/15 text-cream/70 transition hover:border-rose/45 hover:text-rose"
+            aria-label="Next service"
+          >
+            →
+          </button>
+        </div>
+      </div>
+
+    </motion.div>
+
+    {/* ── Extras ── */}
+    <div className="mt-6 border-t border-white/10 pt-5">
+      <p className="text-center text-[0.68rem] uppercase tracking-[0.18em] text-cream/55">
+        + Nail art, repairs & extras available
+      </p>
+      <div className="mt-1.5 text-center">
+        <button
+          type="button"
+          onClick={() => setShowAddOnOptions((current) => !current)}
+          className="text-[0.58rem] uppercase tracking-[0.16em] text-rose transition hover:text-white"
+        >
+          {showAddOnOptions ? "Hide extras" : "View extras"}
+        </button>
+      </div>
+
+      <AnimatePresence initial={false}>
+        {showAddOnOptions ? (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.28, ease }}
+            className="mx-auto mt-3 max-w-xl overflow-hidden"
+          >
+            <ul className="space-y-2 rounded-sm border border-white/10 bg-white/5 p-4">
+              {addOnOptions.map((option) => (
+                <li
+                  key={option.name}
+                  className="flex items-center justify-between gap-3 text-[0.72rem] text-cream/72"
+                >
+                  <span>{option.name}</span>
+                  <span className="shrink-0 text-rose">{formatOptionPrice(option)}</span>
+                </li>
+              ))}
+            </ul>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+    </div>
+
+  </div>
+</section>
         <section id="why" className="bg-blush px-5 py-24 sm:px-8 lg:px-12">
           <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-2 lg:gap-16">
             <Reveal className="relative min-h-[360px] overflow-hidden rounded-sm sm:min-h-[500px]">
@@ -676,14 +981,16 @@ export default function Home() {
                 Premium nail services in Epping, Essex. Beautiful nails designed for retention and confidence.
               </p>
               <div className="mt-6 flex gap-3">
-                {["IG", "FB", "TK"].map((social) => (
+                {socialLinks.map((social) => (
                   <a
-                    key={social}
-                    href="#"
-                    aria-label={social}
+                    key={social.name}
+                    href={social.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label={social.name}
                     className="flex h-9 w-9 items-center justify-center rounded-full border border-white/18 text-[0.7rem] text-cream/70 transition hover:border-rose hover:text-rose"
                   >
-                    {social}
+                    {social.icon}
                   </a>
                 ))}
               </div>
@@ -704,7 +1011,12 @@ export default function Home() {
                 </li>
                 <li>
                   <a className="transition hover:text-rose" href="#services">
-                    Luxury Nail Art
+                    Soft Gel Tips
+                  </a>
+                </li>
+                <li>
+                  <a className="transition hover:text-rose" href="#services">
+                    Gel Polish & Care
                   </a>
                 </li>
                 <li>
@@ -718,16 +1030,16 @@ export default function Home() {
             <div>
               <p className="mb-4 text-[0.65rem] uppercase tracking-[0.22em] text-cream">Visit Us</p>
               <ul className="space-y-2.5 text-[0.82rem] text-cream/60">
-                <li>Epping, Essex</li>
-                <li>CM16, United Kingdom</li>
+                <li>232 High St, Epping</li>
+                <li>CM16 4AU, United Kingdom</li>
                 <li>
-                  <a className="transition hover:text-rose" href="tel:+44000000000">
-                    +44 (0) 000 000 0000
+                  <a className="transition hover:text-rose" href="tel:+442037935582">
+                    +44 20 3793 5582
                   </a>
                 </li>
                 <li>
-                  <a className="transition hover:text-rose" href="mailto:hello@essexnailclub.co.uk">
-                    hello@essexnailclub.co.uk
+                  <a className="transition hover:text-rose" href="mailto:essexnailclub@gmail.com">
+                    essexnailclub@gmail.com
                   </a>
                 </li>
               </ul>
@@ -746,7 +1058,7 @@ export default function Home() {
 
           <div className="flex flex-col gap-3 border-t border-white/10 pt-7 text-[0.72rem] text-cream/35 sm:flex-row sm:items-center sm:justify-between">
             <p>© {year} Essex Nail Club. All rights reserved.</p>
-            <p>Epping · Essex · United Kingdom</p>
+            <p>232 High St · Epping CM16 4AU · United Kingdom</p>
           </div>
         </div>
       </footer>
